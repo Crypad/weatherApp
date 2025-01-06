@@ -4,3 +4,21 @@ h3 {
 #city {
     margin-top: 2.5rem;
 }
+
+#frame {
+    margin-left: 1rem;
+}
+
+#weather {
+    margin: 1rem 0;
+    padding: .5rem ;
+    border: 2px solid rgb(134, 134, 255);
+    border-radius: 10px;
+    background-color: lightblue;
+    width: fit-content;
+}
+
+#icon {
+    display: flex;
+    justify-content: center;
+}

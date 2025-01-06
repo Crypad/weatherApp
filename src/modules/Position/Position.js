@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './Position.css';
+import Map from '../Map/Map';
 import axios from 'axios';
 
 const API_KEY = '0228cb5db66849af97395611250601';
 const API_URL = `http://api.weatherapi.com/v1/current.json`;
+const EXPRESS_SERVER_URL = 'http://localhost:3001/api/weather';
 let city = null;
 
 const Position = () => {
@@ -39,6 +41,7 @@ const Position = () => {
             
             const response = await axios.get(`${API_URL}?key=${API_KEY}&q=${lat},${lon}`);
             setWeather(response.data);
+            sendToExpressServer(lat, lon);
         } catch (error) {
             setError(error.message);
         }
@@ -48,13 +51,27 @@ const Position = () => {
         try {
             const response = await axios.get(`${API_URL}?key=${API_KEY}&q=${city}`);
             setWeather(response.data);
+            sendToExpressServer(city);
         } catch (error) {
             setError(error.message);
         }
     };
 
+    const sendToExpressServer = async (lat = null, lon = null, city = null) => {
+        try {
+          const response = await axios.post(EXPRESS_SERVER_URL, {
+            latitude: lat,
+            longitude: lon,
+            city: city,
+          });
+          console.log(response.data);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
     return (
-        <div>
+        <div id='frame'>
             {latitude && longitude ? (
                 <div>
                     <h3>Votre position actuelle :</h3>
@@ -65,13 +82,15 @@ const Position = () => {
                     <button onClick={() => fetchWeatherByCity(document.getElementById("city").value)}>Rechercher</button>
 
                     {weather ? (
-                        <div>
+                        <div id='weather'>
                             <h3>La meteo pour {weather.location.name}</h3>
+                            <div id='icon'><img src={weather.current.condition.icon} alt={weather.current.condition.icon}></img></div>
                             <p>Condition: {weather.current.condition.text}</p>
                             <p>Temperature: {weather.current.temp_c}°C</p>
-                            <p>Feels like: {weather.current.feelslike_c}°C</p>
-                            <p>Humidity: {weather.current.humidity}%</p>
-                            <p>Wind speed: {weather.current.wind_kph} km/h</p>
+                            <p>Ressenti: {weather.current.feelslike_c}°C</p>
+                            <p>Humidité: {weather.current.humidity}%</p>
+                            <p>Vitesse du vent: {weather.current.wind_kph} km/h</p>
+                            <p>Direction du vent: {weather.current.wind_dir}</p>
                             <p>Pressure: {weather.current.pressure_mb} mb</p>
                         </div>
                     ) : (
@@ -84,6 +103,9 @@ const Position = () => {
             {error ? (
                 <p style={{ color: "red" }}>{error}</p>
             ) : null}
+            <div>
+                <Map latitude={latitude} longitude={longitude} />
+            </div>
         </div>
     );
 };
