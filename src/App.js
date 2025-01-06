@@ -1,9 +1,16 @@
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
+import Position from './modules/Position/Position';
+import Navigation from './modules/Navigation/Navigation';
 
 function App() {
+
   return (
-    <h1>Weather App</h1>
+    <div>
+      <Navigation> </Navigation>
+      <h1>Weather App</h1>
+      <Position> </Position>
+    </div>
   );
 }
 
