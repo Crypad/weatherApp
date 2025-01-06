@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './Position.css';
 import Map from '../Map/Map';
+import Forecast from '../Forecast/Forecast';
 import axios from 'axios';
 
 const API_KEY = '0228cb5db66849af97395611250601';
 const API_URL = `http://api.weatherapi.com/v1/current.json`;
-const EXPRESS_SERVER_URL = 'http://localhost:3001/api/weather';
+const EXPRESS_SERVER_URL = 'http://localhost:4000/api/weather';
 let city = null;
 
 const Position = () => {
@@ -20,7 +21,7 @@ const Position = () => {
                 (position) => {
                     setLatitude(position.coords.latitude);
                     setLongitude(position.coords.longitude);
-                    
+
                     if (city) {
                         fetchWeatherByCity(document.getElementById("city").value);
                     } else {
@@ -38,8 +39,8 @@ const Position = () => {
 
     const fetchWeather = async (lat, lon) => {
         try {
-            
-            const response = await axios.get(`${API_URL}?key=${API_KEY}&q=${lat},${lon}`);
+
+            const response = await axios.get(`${API_URL}?key=${API_KEY}&q=${lat},${lon}&lang=fr`);
             setWeather(response.data);
             sendToExpressServer(lat, lon);
         } catch (error) {
@@ -49,7 +50,7 @@ const Position = () => {
 
     const fetchWeatherByCity = async (city) => {
         try {
-            const response = await axios.get(`${API_URL}?key=${API_KEY}&q=${city}`);
+            const response = await axios.get(`${API_URL}?key=${API_KEY}&q=${city}&lang=fr`);
             setWeather(response.data);
             sendToExpressServer(city);
         } catch (error) {
@@ -59,16 +60,16 @@ const Position = () => {
 
     const sendToExpressServer = async (lat = null, lon = null, city = null) => {
         try {
-          const response = await axios.post(EXPRESS_SERVER_URL, {
-            latitude: lat,
-            longitude: lon,
-            city: city,
-          });
-          console.log(response.data);
+            const response = await axios.post(EXPRESS_SERVER_URL, {
+                latitude: lat,
+                longitude: lon,
+                city: city,
+            });
+            console.log(response.data);
         } catch (error) {
-          console.error(error);
+            console.error(error);
         }
-      };
+    };
 
     return (
         <div id='frame'>
@@ -84,6 +85,7 @@ const Position = () => {
                     {weather ? (
                         <div id='weather'>
                             <h3>La meteo pour {weather.location.name}</h3>
+                            <h2>{weather.current.date}</h2>
                             <div id='icon'><img src={weather.current.condition.icon} alt={weather.current.condition.icon}></img></div>
                             <p>Condition: {weather.current.condition.text}</p>
                             <p>Temperature: {weather.current.temp_c}°C</p>
@@ -103,6 +105,10 @@ const Position = () => {
             {error ? (
                 <p style={{ color: "red" }}>{error}</p>
             ) : null}
+            <div>
+                <h3> Prévision de la semaine </h3>
+                <Forecast ></Forecast>
+            </div>
             <div>
                 <Map latitude={latitude} longitude={longitude} />
             </div>
