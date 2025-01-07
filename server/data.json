@@ -1,0 +1,35 @@
+{
+    "city": "#",
+    "lat": "#",
+    "lon": "#", 
+    "weather": {
+        "description": "#",
+        "icon": "#"
+    },
+    "temperature": "#",
+    "humidity": "#",
+    "windSpeed": "#",
+    "windDirection": "#",
+    "dewPoint": "#",
+    "uvi": "#",
+    "cloudiness": "#",
+    "visibility": "#",
+    "pressure": "#",
+    "sunrise": "#",
+    "sunset": "#",
+    "timezone": "#",
+    "country": "#",
+    "countryCode": "#",
+    "map": {
+        "latitude": "#",
+        "longitude": "#"
+    },
+    "alerts": [
+        {
+            "title": "#",
+            "description": "#",
+            "expires": "#"
+        }
+    ]
+
+}

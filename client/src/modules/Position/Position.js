@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const API_KEY = '0228cb5db66849af97395611250601';
 const API_URL = `http://api.weatherapi.com/v1/current.json`;
-const EXPRESS_SERVER_URL = 'http://localhost:3001/api/weather';
+const EXPRESS_SERVER_URL = 'http://localhost:8080/api/weather';
 let city = null;
 
 const Position = () => {
