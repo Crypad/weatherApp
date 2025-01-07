@@ -2,16 +2,33 @@ const express = require('express');
 const app = express();
 const axios = require('axios');
 const cors = require('cors');
+const fs = require('fs');
+const bodyParser = require('body-parser');
 
 const server = "localhost:";
 const port = "8080";
 
 app.use(cors());
 app.use(express.json());
+// Middleware pour analyser les données JSON du corps de la requête
+app.use(bodyParser.json());
 
-// clé API et Url
+// clé API et Url pour récupérer les données météo
 const apiKey = '0228cb5db66849af97395611250601';
 const url = `http://api.weatherapi.com/v1/current.json`;
+
+
+// Fonction pour vérifier si un fichier existe
+const checkAndCreateFile = (filename, defaultValue) => {
+    if (!fs.existsSync(filename)) {
+      fs.writeFileSync(filename, JSON.stringify(defaultValue, null, 2));
+    }
+};
+  
+// Initialiser les fichiers de données utilisateurs et préférences
+checkAndCreateFile('users.json', []);
+checkAndCreateFile('userLogs.json', []);
+  
 
 
 // Middleware pour enregistrer les connexions utilisateur
@@ -20,7 +37,7 @@ app.use((req, res, next) => {
     const timestamp = new Date().toISOString();
     const logData = { userIp, timestamp };
   
-    // Enregistrement des données dans un fichier JSON
+    // Enregistrement des données dans le fichier userLogs.json
     fs.readFile('userLogs.json', (err, data) => {
       if (err) {
         fs.writeFileSync('userLogs.json', JSON.stringify([logData], null, 2));
@@ -34,9 +51,77 @@ app.use((req, res, next) => {
     next();
 });
 
+// Enregistrement d'un nouvel utilisateur
+app.post('/register', (req, res) => {
+    const { username, email, preferences } = req.body;
+  
+    const newUser = {
+      username,
+      email,
+      preferences: preferences || { units: 'metric', forecastDays: 5 }, // Valeurs par défaut
+      dateJoined: new Date().toISOString(),
+    };
+  
+    fs.readFile('users.json', (err, data) => {
+      if (err) {
+        return res.status(500).send('Erreur interne');
+      }
+  
+      const users = JSON.parse(data);
+      users.push(newUser);
+      fs.writeFileSync('users.json', JSON.stringify(users, null, 2));
+  
+      res.status(201).json({ message: 'Utilisateur enregistré avec succès' });
+    });
+});
+  
+// Récupérer un utilisateur par email
+app.get('/user', (req, res) => {
+    const { email } = req.query;
+  
+    fs.readFile('users.json', (err, data) => {
+      if (err) {
+        return res.status(500).send('Erreur interne');
+      }
+  
+      const users = JSON.parse(data);
+      const user = users.find((user) => user.email === email);
+  
+      if (!user) {
+        return res.status(404).send('Utilisateur non trouvé');
+      }
+  
+      res.json(user);
+    });
+});
+
+// Mise à jour des préférences de l'utilisateur
+app.put('/update-preferences', (req, res) => {
+    const { email, preferences } = req.body;
+  
+    fs.readFile('users.json', (err, data) => {
+      if (err) {
+        return res.status(500).send('Erreur interne');
+      }
+  
+      const users = JSON.parse(data);
+      const userIndex = users.findIndex((user) => user.email === email);
+  
+      if (userIndex === -1) {
+        return res.status(404).send('Utilisateur non trouvé');
+      }
+  
+      users[userIndex].preferences = preferences;
+      fs.writeFileSync('users.json', JSON.stringify(users, null, 2));
+  
+      res.json({ message: 'Préférences mises à jour avec succès' });
+    });
+});
+
+
 
 // ajouter une route pour obtenir les données météorologiques
-// Route pour obtenir les données météo
+// Route pour obtenir les données météo actuelles
 app.post('/api/weather', async (req, res) => {
     console.dir(req.body);  
     // Latitude et Longitude envoyées par le frontend
@@ -112,7 +197,7 @@ app.post('/api/weather', async (req, res) => {
 
 // Endpoint pour obtenir les prévisions sur plusieurs jours
 app.get('/forecast', async (req, res) => {
-    const { lat, lon } = req.query;
+    const { lat, lon, days = 5 } = req.query; // Le nombre de jours par défaut est 5
   
     try {
       const response = await axios.get(url, {
@@ -125,7 +210,7 @@ app.get('/forecast', async (req, res) => {
         },
       });
   
-      const forecastData = response.data.list.map(forecast => ({
+      const forecastData = response.data.list.slice(0, days * 8).map(forecast => ({
         date: forecast.dt_txt,
         temperature: forecast.main.temp,
         humidity: forecast.main.humidity,
