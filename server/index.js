@@ -33,7 +33,9 @@ checkAndCreateFile('userLogs.json', []);
 
 // Middleware pour enregistrer les connexions utilisateur
 app.use((req, res, next) => {
-    const userIp = req.ip;
+    // Récupérer l'IP du client
+    const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
     const timestamp = new Date().toISOString();
     const logData = { userIp, timestamp };
   
