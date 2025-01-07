@@ -43,7 +43,8 @@ const Position = () => {
 
             const response = await axios.post(`${API_URL}?key=${API_KEY}&q=${lat},${lon}&lang=fr`);
             setWeather(response.data);
-            sendToExpressServer(lat, lon);
+            sendToExpressServer(lat, lon, response.data);
+            console.log(response.data + "dsopignsdljgdsslgndslkgndsslkngdslskn");
         } catch (error) {
             setError(error.message);
         }
@@ -59,17 +60,19 @@ const Position = () => {
         }
     };
 
-    const sendToExpressServer = async (lat, lon) => {
+    const sendToExpressServer = async (lat, lon, weather) => {
         try {
-          console.log(lat, lon);
+          console.log(lat, lon, weather);
           const response = await axios.post('http://localhost:8080/api/weather', {
             latitude: lat,
-            longitude: lon
+            longitude: lon,
+            weather: weather
           }, {
             headers: {
               'Content-Type': 'application/json'
             }
           });
+          console.log("-------------------------------------------------------------------------------------------------------------------");
           console.log(response.data);
         } catch (error) {
           console.error(error);
