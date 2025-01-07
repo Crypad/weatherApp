@@ -11,6 +11,8 @@ const Forecast = (props) => {
     const [weather, setWeather] = useState(null);
     const [error, setError] = useState(null);
 
+    console.log(props.cityName);
+
     useEffect(() => {
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
@@ -18,8 +20,11 @@ const Forecast = (props) => {
                     setLatitude(position.coords.latitude);
                     setLongitude(position.coords.longitude);
 
-                    fetchWeather(position.coords.latitude, position.coords.longitude);
-
+                    if (props.cityName) {
+                        fetchWeatherByCity(props.cityName);
+                    } else {
+                        fetchWeather(position.coords.latitude, position.coords.longitude);
+                    }
                 },
                 (error) => {
                     setError(error.message);
@@ -28,7 +33,7 @@ const Forecast = (props) => {
         } else {
             setError("Geolocation is not supported by this browser.");
         }
-    }, []);
+    }, [props.cityName]);
 
     const fetchWeather = async (lat, lon) => {
         try {
@@ -40,12 +45,21 @@ const Forecast = (props) => {
         }
     };
 
+    const fetchWeatherByCity = async (cityName) => {
+        try {
+            const response = await axios.get(`${API_URL}?key=${API_KEY}&q=${cityName}&days=7&lang=fr`);
+            setWeather(response.data);
+        } catch (error) {
+            setError(error.message);
+        }
+    };
+
     return (
         <div id='forecast'>
             {weather && weather.forecast.forecastday.map((day, index) => (
                 <div>
                     <h4>{day.date}</h4>
-                    <img key={index}src={day.day.condition.icon}></img>
+                    <img key={index} src={day.day.condition.icon}></img>
                     <p>{day.day.condition.text}</p>
                     <p>{day.day.avgtemp_c} °C</p>
                 </div>

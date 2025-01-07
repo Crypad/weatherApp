@@ -2,13 +2,19 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 
+const server = "localhost:";
+const port = "8080";
+
 app.use(cors());
 
-// ajouter un itineraire
-app.get('/', (req, res) => {
-    res.send('Hello from our server!')
+app.post('/api/weather', (req, res) => {
+    console.dir(req);
+    const { latitude, longitude } = req.body;
+    console.log("Coords");
+    res.send('Données recus')
 })
 
-app.listen(8080, () => {
-      console.log('server listening on port 8080')
+app.listen("localhost:8080", () => {
+    console.log('server listening on port 8080')
+    
 })
