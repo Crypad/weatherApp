@@ -1,3 +1,7 @@
 h1 {
   padding: 1rem;
 }
+
+#mainDiv {
+  background-color: rgb(214, 241, 249);
+}

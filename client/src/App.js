@@ -7,7 +7,7 @@ import Navigation from './modules/Navigation/Navigation';
 function App() {
 
   return (
-    <div>
+    <div id='mainDiv'>
       <Navigation> </Navigation>
       <h1>Weather App</h1>
       <Position> </Position>
